@@ -1,0 +1,68 @@
+networks:
+  microservices-net:
+    name: microservices-net
+
+services:
+  students:
+    depends_on:
+      students_pg:
+        condition: service_healthy
+    networks:
+      - microservices-net
+    build:
+      context: microservices/students
+      dockerfile: Dockerfile.dev
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/students
+    ports:
+      - "7776:8080"
+    volumes:
+      - ./microservices/students/src/main:/code/src/main
+
+  grades:
+    depends_on:
+      grades_pg:
+        condition: service_healthy
+    networks:
+      - microservices-net
+    build:
+      context: microservices/grades
+      dockerfile: Dockerfile.dev
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/grades
+    ports:
+      - "7777:8080"
+    volumes:
+      - ./microservices/grades/src/main:/code/src/main
+
+  students_pg:
+    image: postgres
+    environment:
+      - POSTGRES_DB=students
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d students -U test" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-net
+
+  grades_pg:
+    image: postgres
+    environment:
+      - POSTGRES_DB=grades
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d grades -U test" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-net
