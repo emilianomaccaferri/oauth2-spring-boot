@@ -3,41 +3,41 @@ networks:
     name: microservices-net
 
 services:
-  students:
-    depends_on:
-      students_pg:
-        condition: service_healthy
-    networks:
-      - microservices-net
-    build:
-      context: microservices/students
-      dockerfile: Dockerfile.dev
-    mem_limit: 512m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/students
-    ports:
-      - "7776:8080"
-    volumes:
-      - ./microservices/students/src/main:/code/src/main
+  # students:
+  #   depends_on:
+  #     - students_pg
+  #       #condition: service_healthy
+  #   networks:
+  #     - microservices-net
+  #   build:
+  #     context: microservices/students
+  #     dockerfile: Dockerfile
+  #   mem_limit: 512m
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/students
+  #   ports:
+  #     - "7776:8080"
+  #   volumes:
+  #     - ./microservices/students/src/main:/code/src/main
 
-  grades:
-    depends_on:
-      grades_pg:
-        condition: service_healthy
-    networks:
-      - microservices-net
-    build:
-      context: microservices/grades
-      dockerfile: Dockerfile.dev
-    mem_limit: 512m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/grades
-    ports:
-      - "7777:8080"
-    volumes:
-      - ./microservices/grades/src/main:/code/src/main
+  # grades:
+  #   depends_on:
+  #     - grades_pg
+  #       #condition: service_healthy
+  #   networks:
+  #     - microservices-net
+  #   build:
+  #     context: microservices/grades
+  #     dockerfile: Dockerfile
+  #   mem_limit: 512m
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - DB_CONNECTION_STRING=postgresql://test:test@students_pg:5432/grades
+  #   ports:
+  #     - "7777:8080"
+  #   volumes:
+  #     - ./microservices/grades/src/main:/code/src/main
 
   students_pg:
     image: postgres
@@ -52,6 +52,8 @@ services:
       retries: 5
     networks:
       - microservices-net
+    ports:
+      - "5432:5432"
 
   grades_pg:
     image: postgres
@@ -66,3 +68,5 @@ services:
       retries: 5
     networks:
       - microservices-net
+    ports:
+      - "5433:5432"

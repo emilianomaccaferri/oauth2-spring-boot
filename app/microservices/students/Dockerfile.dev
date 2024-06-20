@@ -1,6 +1,0 @@
-FROM eclipse-temurin:17
-WORKDIR /code
-COPY . /code
-EXPOSE 8080
-RUN chmod +x start.sh && ./gradlew getDependencies
-CMD ["sh", "start.sh"]
