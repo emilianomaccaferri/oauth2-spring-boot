@@ -1,5 +1,15 @@
 server.port: 8081
 server.error.include-message: always
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/grades
+    username: test
+    password: test
+  jpa:
+    properties:
+      hibernate:
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 ---
 spring.config.activate.on-profile: docker
 server.port: 8080

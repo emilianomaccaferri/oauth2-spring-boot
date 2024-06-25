@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a869226-16b0-42d3-abd7-acc4e110b3c0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/microservices/grades/src/main/java/cloud/macca/microservices/grades/model/Grade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/microservices/grades/src/main/java/cloud/macca/microservices/grades/repository/GradeRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservices/grades/Dockerfile.dev" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservices/students/Dockerfile.dev" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/microservices/students/src/main/java/cloud/macca/microservices/students/controller/ExampleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/microservices/students/src/main/java/cloud/macca/microservices/students/controller/ExampleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/microservices/grades/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/microservices/grades/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/microservices/grades/src/main/java/cloud/macca/microservices/grades/controller/ExampleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/microservices/grades/src/main/java/cloud/macca/microservices/grades/controller/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/microservices/grades/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/microservices/grades/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,15 +26,16 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 2
-}</component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
   <component name="ProjectId" id="2i8gRmDUgUTnSIUQlUhp5OwQap9" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -42,15 +43,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Gradle.Build app.executor": "Run",
     "Gradle.app:microservices:grades [:microservices:grades:GradesApplication.main()].executor": "Run",
-    "Gradle.app:microservices:students [:microservices:students:StudentsApplication.main()].executor": "Run",
-    "Kotlin script (Beta).settings.gradle.kts.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/macca/stuff/uni/oauth2-spring-boot/app/microservices/students"
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
 }]]></component>
   <component name="RecentsManager">
