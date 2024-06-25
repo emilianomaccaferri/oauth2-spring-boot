@@ -20,19 +20,18 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.postgresql:postgresql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-configurations {
+/*configurations {
 	implementation.configure {
 		exclude(module = "spring-boot-starter-tomcat")
 		exclude("org.apache.tomcat")
 	}
-}
+}*/
 
 tasks.withType<Test> {
 	useJUnitPlatform()

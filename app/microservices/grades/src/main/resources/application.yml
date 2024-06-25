@@ -1,5 +1,7 @@
 server.port: 8081
 server.error.include-message: always
+students-uri: http://localhost:8080/
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/grades
@@ -9,7 +11,6 @@ spring:
     properties:
       hibernate:
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 ---
 spring.config.activate.on-profile: docker
 server.port: 8080

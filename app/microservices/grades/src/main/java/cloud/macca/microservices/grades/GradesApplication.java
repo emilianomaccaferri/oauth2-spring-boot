@@ -12,9 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class GradesApplication {
 
 	private final GradeRepository grades;
-	public GradesApplication(
-			GradeRepository grades
-	) {
+	public GradesApplication(GradeRepository grades) {
 		this.grades = grades;
 	}
 	public static void main(String[] args) {
