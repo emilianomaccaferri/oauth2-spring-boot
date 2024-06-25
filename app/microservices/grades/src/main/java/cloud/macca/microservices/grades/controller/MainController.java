@@ -30,10 +30,10 @@ public class MainController {
         // check if the student exists!
         grades.insertGrade(
                 body.getGrade(),
-                Integer.valueOf(studentId)
+                Integer.parseInt(studentId)
         );
 
-        return new SuccessResponse("ok");
+        return new SuccessResponse<String>("ok");
     }
 
     @GetMapping(value = "/{studentId}")
