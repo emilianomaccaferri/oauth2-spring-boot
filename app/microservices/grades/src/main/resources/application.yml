@@ -1,6 +1,9 @@
 server.port: 8081
 server.error.include-message: always
-students-uri: http://localhost:8080/
+server.error.include-stacktrace: never
+
+students.uri: http://localhost:8080/
+
 
 spring:
   datasource:

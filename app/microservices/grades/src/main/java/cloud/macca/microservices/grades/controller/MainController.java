@@ -24,15 +24,19 @@ public class MainController {
             @PathVariable String studentId,
             @RequestBody AddGradeRequest body
     ) {
-
-        Student student = studentsService.getStudent(Integer.parseInt(studentId));
+        studentsService.getStudent(Integer.parseInt(studentId));
         grades.insertGrade(body.getGrade(), Integer.parseInt(studentId));
-
-        return new SuccessResponse<String>("ok");
+        return new SuccessResponse<String>("grade added");
     }
 
     @GetMapping(value = "/{studentId}")
     public Iterable<Grade> getGradesByStudentId(@PathVariable String studentId){
         return grades.findByStudentId(Integer.valueOf(studentId));
     }
+
+    @GetMapping(value = "/")
+    public Iterable<Grade> getAllGrades(){
+        return grades.findAll();
+    }
+
 }

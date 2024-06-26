@@ -1,5 +1,19 @@
 server.port: 8080
 server.error.include-message: always
+server.error.include-stacktrace: never
+
+grades.uri: http://localhost:8081/
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/students
+    username: test
+    password: test
+  jpa:
+    properties:
+      hibernate:
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 ---
 spring.config.activate.on-profile: docker
 server.port: 8080
