@@ -30,13 +30,13 @@ public class MainController {
     }
 
     @GetMapping(value = "/{studentId}")
-    public Iterable<Grade> getGradesByStudentId(@PathVariable String studentId){
-        return grades.findByStudentId(Integer.valueOf(studentId));
+    public SuccessResponse<Iterable<Grade>> getGradesByStudentId(@PathVariable String studentId){
+        return new SuccessResponse<Iterable<Grade>>(grades.findByStudentId(Integer.valueOf(studentId)));
     }
 
     @GetMapping(value = "/")
-    public Iterable<Grade> getAllGrades(){
-        return grades.findAll();
+    public SuccessResponse<Iterable<Grade>> getAllGrades(){
+        return new SuccessResponse<Iterable<Grade>>(grades.findAll());
     }
 
 }
