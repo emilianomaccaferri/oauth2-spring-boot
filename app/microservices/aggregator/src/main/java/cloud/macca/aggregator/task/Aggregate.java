@@ -50,7 +50,7 @@ public class Aggregate extends TimerTask {
 
     private void performAuthentication() throws NotOkException, IOException {
         // short lived credentials for the authenticator!
-        String clientSecret = "IxowHrHfhXYkGWh43CZIZKd2Ny4cFcPv";
+        String clientSecret = "F2gMYzEXhxyZjqRaWjiU7jma4U5mCWDP";
         String clientId = "aggregator";
         String authUri = "http://localhost:7777/realms/master/protocol/openid-connect/token";
 
@@ -67,12 +67,12 @@ public class Aggregate extends TimerTask {
     public void run() {
         String gradesUri = System.getenv("GRADES_URI");
         if(gradesUri == null){
-            gradesUri = "http://localhost:8081";
+            gradesUri = "http://localhost:8089/grades/";
         }
 
         String studentsUri = System.getenv("STUDENTS_URI");
         if(studentsUri == null){
-            studentsUri = "http://localhost:8080";
+            studentsUri = "http://localhost:8089/students/";
         }
 
         try{
