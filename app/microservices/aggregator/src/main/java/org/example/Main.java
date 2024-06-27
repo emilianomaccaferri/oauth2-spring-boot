@@ -12,9 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.sql.Time;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -72,6 +70,24 @@ class GradesResponse{
     }
 }
 
+class ReportCard {
+    private final String studentFullName;
+    private final List<Grade> studentGrades;
+    public ReportCard(String studentFullName, List<Grade> grades){
+        this.studentFullName = studentFullName;
+        this.studentGrades = grades;
+    }
+
+    @Override
+    public String toString() {
+        return "ReportCard{" +
+                "studentFullName='" + studentFullName + '\'' +
+                ", studentGrades=" + studentGrades.stream().map(g -> g.value).toList() +
+                ", avg = " + studentGrades.stream().map(g -> (double) g.value / studentGrades.size()).reduce(0.0, Double::sum) +
+                '}';
+    }
+}
+
 class Aggregate extends TimerTask {
 
     private final OkHttpClient client = new OkHttpClient();
@@ -101,6 +117,16 @@ class Aggregate extends TimerTask {
         try{
             StudentsResponse allStudents = this.fetchData(studentsUri, StudentsResponse.class);
             GradesResponse allGrades = this.fetchData(gradesUri, GradesResponse.class);
+
+            final List<ReportCard> cards = Arrays.stream(allStudents.result).map(student -> {
+                List<Grade> studentGrades = Arrays.stream(allGrades.result).filter(grade -> grade.studentId == student.id).toList();
+                return new ReportCard(student.name + " " + student.surname, studentGrades);
+            }).toList();
+
+            cards.forEach(card -> {
+                System.out.println(card.toString());
+            });
+
         }catch(MalformedURLException e){
             System.out.println("cannot perform task because the url is malformed");
         }catch(IOException e){
