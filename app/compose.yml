@@ -70,3 +70,21 @@ services:
       - microservices-net
     ports:
       - "5433:5432"
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: ./keycloak/Dockerfile
+      network: host
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_PORT=7777
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - 7777:8080
+    networks:
+      - microservices-net

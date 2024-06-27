@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3639af81-9b21-4970-93d4-10efafa4ce59" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/dto/AuthResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/dto/GradesResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/dto/StudentsResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/error/NotOkException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/model/Grade.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/model/ReportCard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/model/Student.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/cloud/macca/aggregator/task/Aggregate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../grades/src/main/java/cloud/macca/microservices/grades/oauth/OAuth2Configuration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../students/src/main/java/cloud/macca/microservices/grades/oauth/OAuth2Configuration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../../compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../grades/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../grades/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../grades/src/main/java/cloud/macca/microservices/grades/controller/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../grades/src/main/java/cloud/macca/microservices/grades/controller/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../grades/src/main/java/cloud/macca/microservices/grades/service/StudentsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../grades/src/main/java/cloud/macca/microservices/grades/service/StudentsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../grades/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../grades/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../students/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../students/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../students/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../students/src/main/resources/application.yml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 4
+}]]></component>
+  <component name="ProjectId" id="2iSXL8ZOCDkwK2BJSb7ya1nlzxH" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.aggregator [:Main.main()].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "keycloak-cross-cutting",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/macca/stuff/uni/oauth2-spring-boot/app/microservices/grades"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3639af81-9b21-4970-93d4-10efafa4ce59" name="Changes" comment="" />
+      <created>1719484894358</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1719484894358</updated>
+    </task>
+    <servers />
+  </component>
+</project>

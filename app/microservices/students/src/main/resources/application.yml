@@ -4,8 +4,13 @@ server.error.include-stacktrace: never
 
 grades.uri: http://localhost:8081/
 
-
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:7777/realms/master
+          jwk-set-uri: http://localhost:7777/realms/master/protocol/openid-connect/certs
   datasource:
     url: jdbc:postgresql://localhost:5432/students
     username: test

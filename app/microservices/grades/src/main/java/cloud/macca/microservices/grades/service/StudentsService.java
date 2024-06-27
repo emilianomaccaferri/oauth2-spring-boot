@@ -22,11 +22,12 @@ public class StudentsService {
         this.http = builder.uriBuilderFactory(f).build();
     }
 
-    public Student getStudent(int studentId) {
+    public Student getStudent(int studentId, String bearer) {
 
         return this.http
                 .get()
                 .uri("/{id}", studentId)
+                .header("Authorization", bearer)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                     throw new StudentNotFoundError(studentId);

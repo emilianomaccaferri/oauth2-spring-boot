@@ -7,7 +7,9 @@ import cloud.macca.microservices.grades.model.Grade;
 import cloud.macca.microservices.grades.repository.GradeRepository;
 import cloud.macca.microservices.grades.service.StudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping(value = "/")
@@ -22,9 +24,11 @@ public class MainController {
     @PostMapping(value = "/{studentId}")
     public SuccessResponse<String> addGradeToStudentId(
             @PathVariable String studentId,
-            @RequestBody AddGradeRequest body
+            @RequestBody AddGradeRequest body,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        studentsService.getStudent(Integer.parseInt(studentId));
+        // we are sure the header exists and is valid, because the jwt checks already passed!
+        studentsService.getStudent(Integer.parseInt(studentId), authorizationHeader);
         grades.insertGrade(body.getGrade(), Integer.parseInt(studentId));
         return new SuccessResponse<String>("grade added");
     }
