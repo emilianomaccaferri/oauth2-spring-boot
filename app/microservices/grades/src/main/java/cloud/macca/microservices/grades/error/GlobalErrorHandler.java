@@ -14,7 +14,7 @@ public class GlobalErrorHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse<String> handle500(
-            BadRequestException e, WebRequest w
+            Exception e, WebRequest w
     ){
         return ErrorResponse.internalServerError();
     }
