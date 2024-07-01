@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.dto.response;
+package cloud.macca.microservices.students.dto.response;
 
 public class SuccessResponse<T> {
     private T result;
