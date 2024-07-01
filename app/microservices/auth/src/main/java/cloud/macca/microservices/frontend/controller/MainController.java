@@ -1,6 +1,7 @@
 package cloud.macca.microservices.frontend.controller;
 
 import cloud.macca.microservices.frontend.dto.AccessTokenResponse;
+import cloud.macca.microservices.frontend.dto.SuccessResponse;
 import cloud.macca.microservices.frontend.error.AuthorizationBadRequestError;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,6 +46,11 @@ public class MainController {
     @GetMapping(value = "/init-login")
     public RedirectView beginLoginSession(){
         return new RedirectView(authEndpoint + "/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=example-spring&redirect_uri=" + redirectUri);
+    }
+
+    @GetMapping(value = "/test-no-filter")
+    public SuccessResponse<String> exampleNoFilter(){
+        return new SuccessResponse<String>("hello non filtered!");
     }
 
     @GetMapping(value = "/code")
