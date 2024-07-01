@@ -1,13 +1,11 @@
-package cloud.macca.microservices.grades.service;
+package cloud.macca.microservices.frontend.service;
 
-import cloud.macca.microservices.grades.dto.User;
-import cloud.macca.microservices.grades.error.ExpiredAccessTokenError;
-import org.springframework.beans.factory.annotation.Autowired;
+import cloud.macca.microservices.frontend.dto.User;
+import cloud.macca.microservices.frontend.error.ExpiredAccessTokenError;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Service
 public class UserService {

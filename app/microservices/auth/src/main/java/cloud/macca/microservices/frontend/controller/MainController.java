@@ -1,7 +1,7 @@
-package cloud.macca.microservices.grades.controller;
+package cloud.macca.microservices.frontend.controller;
 
-import cloud.macca.microservices.grades.dto.AccessTokenResponse;
-import cloud.macca.microservices.grades.error.AuthorizationBadRequestError;
+import cloud.macca.microservices.frontend.dto.AccessTokenResponse;
+import cloud.macca.microservices.frontend.error.AuthorizationBadRequestError;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;

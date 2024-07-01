@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.dto;
+package cloud.macca.microservices.frontend.dto;
 
 import org.springframework.http.HttpStatus;
 

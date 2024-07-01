@@ -1,6 +1,6 @@
-package cloud.macca.microservices.grades.error;
+package cloud.macca.microservices.frontend.error;
 
-import cloud.macca.microservices.grades.dto.ErrorResponse;
+import cloud.macca.microservices.frontend.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;

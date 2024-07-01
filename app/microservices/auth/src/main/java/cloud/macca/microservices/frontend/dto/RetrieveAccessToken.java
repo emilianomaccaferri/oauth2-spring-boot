@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.dto;
+package cloud.macca.microservices.frontend.dto;
 
 public class RetrieveAccessToken {
     private String accessToken;

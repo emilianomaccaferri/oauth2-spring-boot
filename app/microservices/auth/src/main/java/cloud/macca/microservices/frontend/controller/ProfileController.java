@@ -1,11 +1,11 @@
-package cloud.macca.microservices.grades.controller;
+package cloud.macca.microservices.frontend.controller;
 
-import cloud.macca.microservices.grades.dto.Grade;
-import cloud.macca.microservices.grades.dto.Student;
-import cloud.macca.microservices.grades.dto.User;
-import cloud.macca.microservices.grades.service.GradesService;
-import cloud.macca.microservices.grades.service.StudentsService;
-import cloud.macca.microservices.grades.service.UserService;
+import cloud.macca.microservices.frontend.dto.Grade;
+import cloud.macca.microservices.frontend.dto.Student;
+import cloud.macca.microservices.frontend.dto.User;
+import cloud.macca.microservices.frontend.service.GradesService;
+import cloud.macca.microservices.frontend.service.StudentsService;
+import cloud.macca.microservices.frontend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;

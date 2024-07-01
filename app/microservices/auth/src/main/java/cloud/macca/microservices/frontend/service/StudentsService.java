@@ -1,14 +1,10 @@
-package cloud.macca.microservices.grades.service;
+package cloud.macca.microservices.frontend.service;
 
-import cloud.macca.microservices.grades.dto.GetAllStudentsResponse;
-import cloud.macca.microservices.grades.dto.Student;
+import cloud.macca.microservices.frontend.dto.GetAllStudentsResponse;
+import cloud.macca.microservices.frontend.dto.Student;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
-import java.util.Optional;
 
 @Service
 public class StudentsService {
