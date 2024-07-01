@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.Arrays;
+import java.util.logging.Logger;
+
 @Service
 public class GradesService {
 
-    @Value("${microservices.students_endpoint}")
+    @Value("${microservices.grades_endpoint}")
     private String gradesEndpoint;
     private final RestClient http;
 
@@ -20,11 +23,11 @@ public class GradesService {
     }
 
     public Grade[] getAllGrades(String accessToken){
-        RestClient.ResponseSpec response = this.http.get()
+        GetAllGradesResponse response = this.http.get()
                 .uri(gradesEndpoint + "/")
                 .header("Authorization", "Bearer " + accessToken)
-                .retrieve();
-        GetAllGradesResponse grades = response.body(GetAllGradesResponse.class);
-        return grades.result;
+                .retrieve()
+                .body(GetAllGradesResponse.class);
+        return response.result;
     }
 }

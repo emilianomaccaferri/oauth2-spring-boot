@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 @Controller
 @RequestMapping(value = "/profile/")
@@ -66,6 +67,7 @@ public class ProfileController {
         model.addAttribute("user", currentUser);
         model.addAttribute("students", allStudents);
         model.addAttribute("grades", gradesByStudent);
+        Logger.getGlobal().info(gradesByStudent.toString());
         return "profile/index";
     }
 }
