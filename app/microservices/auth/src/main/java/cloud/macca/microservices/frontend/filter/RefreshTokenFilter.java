@@ -1,5 +1,7 @@
 package cloud.macca.microservices.frontend.filter;
 
+import cloud.macca.microservices.frontend.dto.AccessTokenResponse;
+import cloud.macca.microservices.frontend.error.AuthorizationBadRequestError;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.JwkProviderBuilder;
@@ -14,7 +16,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -23,14 +29,30 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Component
 public class RefreshTokenFilter extends OncePerRequestFilter {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    @Value("${auth.jwks_uri}")
     private String jwkEndpoint;
+    @Value("${auth.endpoint}")
+    private String authEndpoint;
+    @Value("${auth.client_id}")
+    private String clientId;
+    @Value("${auth.client_secret}")
+    private String clientSecret;
+
+    private final RestClient http;
+
+    public RefreshTokenFilter(
+            RestClient.Builder builder
+    ){
+        this.http = builder.build();
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -47,8 +69,8 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         // we want to refresh the access token, if any, if expired!
 
         Cookie[] cookies = request.getCookies();
-        String refreshToken = Arrays.stream(cookies).filter(c -> c.getName().equals("refresh_token")).toString();
-        String accessToken = Arrays.stream(cookies).filter(c -> c.getName().equals("access_token")).toString();
+        String refreshToken = Arrays.stream(cookies).filter(c -> c.getName().equals("refresh_token")).map(Cookie::getValue).toList().get(0);
+        String accessToken = Arrays.stream(cookies).filter(c -> c.getName().equals("access_token")).map(Cookie::getValue).toList().get(0);
 
         if(refreshToken == null || accessToken == null){
             // keep the request going, it will eventually fail if the accessToken is null!
@@ -83,6 +105,21 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         DecodedJWT jwtAccessToken = JWT.require(algo).build().verify(accessToken);
         if(jwtAccessToken.getExpiresAt().getTime() < Date.from(Instant.now()).getTime()){
             // if the token is expired, then refresh it using the oauth2 refresh token mechanism
+            MultiValueMap<String, String> reqBody = new LinkedMultiValueMap<>();
+            reqBody.add("client_id", clientId);
+            reqBody.add("client_secret", clientSecret);
+            reqBody.add("grant_type", "refresh_token");
+            reqBody.add("refresh_token", refreshToken);
+
+            AccessTokenResponse refreshTokenResponse = this.http
+                    .post()
+                    .uri(authEndpoint + "/protocol/openid-connect/token")
+                    .body(reqBody)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                        throw new AuthorizationBadRequestError(new String(res.getBody().readAllBytes()));
+                    })
+                    .body(AccessTokenResponse.class);
         }
     }
 
