@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades;
+package cloud.macca.microservices.students;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;

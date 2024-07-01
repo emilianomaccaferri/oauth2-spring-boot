@@ -1,14 +1,12 @@
-package cloud.macca.microservices.grades.controller;
+package cloud.macca.microservices.students.controller;
 
-import cloud.macca.microservices.grades.dto.request.AddStudentRequest;
-import cloud.macca.microservices.grades.dto.response.SuccessResponse;
-import cloud.macca.microservices.grades.error.StudentNotFoundError;
-import cloud.macca.microservices.grades.model.Student;
-import cloud.macca.microservices.grades.repository.StudentsRepository;
+import cloud.macca.microservices.students.dto.request.AddStudentRequest;
+import cloud.macca.microservices.students.dto.response.SuccessResponse;
+import cloud.macca.microservices.students.error.StudentNotFoundError;
+import cloud.macca.microservices.students.model.Student;
+import cloud.macca.microservices.students.repository.StudentsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/")

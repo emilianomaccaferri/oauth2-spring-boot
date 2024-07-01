@@ -1,12 +1,10 @@
-package cloud.macca.microservices.grades.error;
+package cloud.macca.microservices.students.error;
 
-import cloud.macca.microservices.grades.dto.response.ErrorResponse;
+import cloud.macca.microservices.students.dto.response.ErrorResponse;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-
-import java.util.logging.Logger;
 
 @RestControllerAdvice
 public class GlobalErrorHandler {
