@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.dto.request;
+package cloud.macca.microservices.students.dto.request;
 
 public class AddStudentRequest {
     String name, surname;

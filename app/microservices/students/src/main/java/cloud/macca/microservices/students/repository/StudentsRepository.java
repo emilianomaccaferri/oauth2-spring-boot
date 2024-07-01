@@ -1,6 +1,6 @@
-package cloud.macca.microservices.grades.repository;
+package cloud.macca.microservices.students.repository;
 
-import cloud.macca.microservices.grades.model.Student;
+import cloud.macca.microservices.students.model.Student;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

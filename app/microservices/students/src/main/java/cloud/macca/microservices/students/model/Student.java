@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.model;
+package cloud.macca.microservices.students.model;
 
 import jakarta.persistence.*;
 
