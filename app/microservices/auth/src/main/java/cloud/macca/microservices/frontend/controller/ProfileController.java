@@ -6,6 +6,8 @@ import cloud.macca.microservices.frontend.dto.User;
 import cloud.macca.microservices.frontend.service.GradesService;
 import cloud.macca.microservices.frontend.service.StudentsService;
 import cloud.macca.microservices.frontend.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/profile/")
@@ -43,7 +46,20 @@ public class ProfileController {
     public String profileHome(
             Model model,
             @CookieValue(value = "access_token", required = false) String accessToken
+            // HttpServletRequest req
     ){
+        /*List<Cookie> accessTokenCookieList = Arrays.stream(req.getCookies()).filter(s -> {
+            return Objects.equals(s.getName(), "access_token");
+        }).toList();
+
+        if(accessTokenCookieList.isEmpty()){
+            return "profile/invalid_token";
+        }
+        Cookie accessTokenCookie = accessTokenCookieList.get(0);
+        if(accessTokenCookie == null){
+            return "profile/invalid_token";
+        }
+        String accessToken = accessTokenCookie.getValue();*/
         if(accessToken == null){
             return "profile/invalid_token";
         }
@@ -67,7 +83,6 @@ public class ProfileController {
         model.addAttribute("user", currentUser);
         model.addAttribute("students", allStudents);
         model.addAttribute("grades", gradesByStudent);
-        Logger.getGlobal().info(gradesByStudent.toString());
         return "profile/index";
     }
 }

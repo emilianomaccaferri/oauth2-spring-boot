@@ -5,7 +5,7 @@ server.error.include-stacktrace: never
 auth:
   endpoint: http://localhost:7777/realms/master
   client_id: example-spring
-  client_secret: zknSaGTc8lUGBvvxphaxq48Nw19XFshH
+  client_secret: XInRazVJRZjCv5EJA0MwET9DoK8RPNsb
   redirect_uri: http://localhost:8082/auth/code
   jwks_uri: http://localhost:7777/realms/master/protocol/openid-connect/certs
 

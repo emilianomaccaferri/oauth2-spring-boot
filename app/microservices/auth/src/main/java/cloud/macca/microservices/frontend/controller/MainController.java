@@ -92,9 +92,6 @@ public class MainController {
         r.addCookie(accessTokenCookie);
         r.addCookie(refreshTokenCookie);
 
-        Logger.getGlobal().info(response.accessToken);
-        Logger.getGlobal().info(response.refreshToken);
-
         return new RedirectView("/profile/");
 
     }
