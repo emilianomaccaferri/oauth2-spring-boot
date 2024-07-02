@@ -1,4 +1,4 @@
-package cloud.macca.microservices.grades.oauth;
+package cloud.macca.microservices.students.oauth;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
