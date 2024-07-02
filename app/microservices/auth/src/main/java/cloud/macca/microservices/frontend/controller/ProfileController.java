@@ -46,20 +46,7 @@ public class ProfileController {
     public String profileHome(
             Model model,
             @CookieValue(value = "access_token", required = false) String accessToken
-            // HttpServletRequest req
     ){
-        /*List<Cookie> accessTokenCookieList = Arrays.stream(req.getCookies()).filter(s -> {
-            return Objects.equals(s.getName(), "access_token");
-        }).toList();
-
-        if(accessTokenCookieList.isEmpty()){
-            return "profile/invalid_token";
-        }
-        Cookie accessTokenCookie = accessTokenCookieList.get(0);
-        if(accessTokenCookie == null){
-            return "profile/invalid_token";
-        }
-        String accessToken = accessTokenCookie.getValue();*/
         if(accessToken == null){
             return "profile/invalid_token";
         }
