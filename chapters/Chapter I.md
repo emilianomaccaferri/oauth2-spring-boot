@@ -43,5 +43,18 @@ Notice how the flow is much shorter and simpler: that's because one can make str
 Nevertheless, credentials on the microservice must be safely handled and rotated periodically.
 
 ### Access token usage
+Once the access token is obtained, it can be used to make authenticated request towards the protected API (in the picture above we can represent the protected API with the "microservices" block).<br>
+It is the microservice's responsibility, then, to  verify the token's validity.<br>
+For simplicity's sake, we are not going to delve into cryptographical details on how JWTs are created: we just need to know that JWTs are cryptographically signed strings that encode information in JSON format.<br>
+The signing happens on the OAuth2 server's side with a private key and each microservice that will need to validate tokens issued by this server will receive a copy of the server's public key: this way, the verification is done completely "offline", meaning that microservices won't need to interrogate the OAuth2 server every time it receives an authenticated request.
+
+We will see in detail how this process works in the next chapters, for now that's all we need to know.
 
 ### Refresh token usage
+Once the access token expires, verifying the JWT will return an error. That's when the client should __refresh__ its access token.
+<br>
+The refresh mechanism is very simple: the OAuth2 server exposes a refresh token endpoint to which applications can request new access tokens.<br>
+Note that here, too, the process happens entirely on the backend side (for the same reasons we talked about before) and it's the auth microservice's (the one represented in the first image of this section) responsibility to ensure the token is refreshed correctly.
+<br>
+Here's a quick breakdown of how the process works, again, we will see it in much more detail later.<br>
+![refresh token flow](assets/refresh_token.png)
