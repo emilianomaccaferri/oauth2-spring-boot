@@ -31,6 +31,16 @@ We will use the "basic" version, without [PKCE](https://oauth.net/2/pkce/), beca
 10. the frontend can now make authenticated requests to other microservices;
 
 ### Service account flow
+As already mentioned, the service account flow is used by non-user driven processes, i.e. applications that aggregate user data (CQRS microservices) or notification services that query other microservices for reports and similar things.
+![auth code flow](assets/service_account_flow.png).
+
+1. the microservice has some pre-generated credentials with which it will make a request for tokens;
+2. the OAuth2 service validates the credentials...
+3. ...and returns the tokens to the microservice;
+4. authenticated requests can now be sent to other microservices.
+
+Notice how the flow is much shorter and simpler: that's because one can make stronger assumptions about the microservice, which means that it can be presumed much less likely to be vulnerable with respect to malicious third parties.<br>
+Nevertheless, credentials on the microservice must be safely handled and rotated periodically.
 
 ### Access token usage
 
