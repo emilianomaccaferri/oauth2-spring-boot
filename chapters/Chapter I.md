@@ -58,3 +58,65 @@ Note that here, too, the process happens entirely on the backend side (for the s
 <br>
 Here's a quick breakdown of how the process works, again, we will see it in much more detail later.<br>
 ![refresh token flow](assets/refresh_token.png)
+
+## Keycloak
+Now that we talked about the theory, let's put it into practice with Keycloak.
+<br>
+We will use Keycloak's Docker image because we will model our system through a Docker Compose file for simplicity and reproducibility.
+### Starting up
+Let's fire up a basic Keycloak instance: to do so, use the following `compose.yml` file
+```yaml
+keycloak:
+    build:
+      context: .
+      dockerfile: ./path/to/Dockerfile
+      network: host
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_PORT=8080
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - 8080:8080
+```
+Keycloak requires a Dockerfile to start, because it needs to generate a private/public keypair for crypto operations:
+```Dockerfile
+FROM quay.io/keycloak/keycloak:latest as builder
+
+# Enable health and metrics support
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+
+WORKDIR /opt/keycloak
+# for demonstration purposes only, please make sure to use proper certificates in production instead
+RUN keytool -genkeypair -storepass password -storetype PKCS12 -keyalg RSA -keysize 2048 -dname "CN=server" -alias server -ext "SAN:c=DNS:localhost,IP:127.0.0.1" -keystore conf/server.keystore
+RUN /opt/keycloak/bin/kc.sh build
+
+FROM quay.io/keycloak/keycloak:latest
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+```
+Everything is ready, we just need to start our container:
+```bash
+docker compose up 
+````
+Note: we are not going to delve into the details of a production-ready deployment with Keycloak because it's out of the scope of this project. This setup will be the same we are going use throughout the whole project and, of course, it's not production ready since it uses an in-memory database to store user information, which is not ideal for a highly available environment.
+
+### Realms
+Now that we fired up our Keycloak instance, let's navigate to [http://localhost:8080](http://localhost:8080). The interface should look something like this:
+![keycloak home](assets/keycloak_1.png)
+
+Keycloak introduces the concept of __realms__ as a way to _namespace_ different configurations and users.<br>
+A realm in Keycloak is essentially a __tenant__, which is a space where all the information about a set of users and applications is managed. Each realm is isolated from other realms, allowing for multi-tenancy within a single Keycloak instance.
+<br>
+Let's imagine we were to have an application that runs two environments: staging and production. We certainly wouldn't want to have staging and production users mixed, so we would have to create two realms (i.e. _staging-realm_ and _production-realm_) to separate the users.<br>
+The staging environment would then refer to the first realm, whereas the production one would use the latter.
+
+Keycloak starts, by default, with the __master__ realm already created, which is a management realm, used to create and administrate other realms. You should not use this realm for production usage, because access to this realm can compromise the instance's configuration.
+<br>
+Let's create a new realm by clicking on the top-left dropdown and onto "Create realm":
+![create realm](assets/keycloak_2.png)
+Just input its name, we don't have a resource file, and then proceed.
+![create realm - name](assets/keycloak_3.png)
