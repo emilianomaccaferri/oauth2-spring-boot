@@ -105,7 +105,7 @@ docker compose up
 Note: we are not going to delve into the details of a production-ready deployment with Keycloak because it's out of the scope of this project. This setup will be the same we are going use throughout the whole project and, of course, it's not production ready since it uses an in-memory database to store user information, which is not ideal for a highly available environment.
 
 ### Realms
-Now that we fired up our Keycloak instance, let's navigate to [http://localhost:8080](http://localhost:8080). The interface should look something like this:
+Now that we fired up our Keycloak instance, let's navigate to [http://localhost:8080](http://localhost:8080) and login with the default credentials ("admin", "admin"). The interface should look something like this:
 ![keycloak home](assets/keycloak_1.png)
 
 Keycloak introduces the concept of __realms__ as a way to _namespace_ different configurations and users.<br>
@@ -120,3 +120,25 @@ Let's create a new realm by clicking on the top-left dropdown and onto "Create r
 ![create realm](assets/keycloak_2.png)
 Just input its name, we don't have a resource file, and then proceed.
 ![create realm - name](assets/keycloak_3.png)
+
+### Clients
+Let's talk about how applications can interact with Keycloak, meaning, how can applications perform all the flows and tasks we mentioned before?<br>
+Keycloak, and, in general, all OAuth2 servers, introduces the concept of _clients_, that represents something, an application, trying to use OAuth2 functionality to access a protected resources.<br>
+There are __confidential clients__ and __public__ clients:
+
+- confidential clients are applications that are able to securely authenticate with the authorization server. In our previous example, the confidential client is the auth microservice. Basically, confidential clients are the middlemen between the user and the authorization server. Confidential clients are represented by a `client_secret` and a `client_id`;
+- public clienst are basically applications running in a browser or on a mobile device. They are essentialy the end users of access and refresh tokens.
+
+In other words, public clients rely on confidential clients to obtain credentials and then they use the latter to access private resources.
+<br>
+Let's see how to create a client and how to use them.
+#### Creating a confidential client in Keycloak
+<div style="display: flex; flex-direction: column;">
+On the left panel of Keycloak's interface, click on "Clients":
+<img src="assets/keycloak_4.png" style="height: 600px; align-self: center">
+</div>
+In the following screen, click on "Create client".
+<br>
+
+You can just enter the __client id__ and then proceed:
+![create client - 2](assets/keycloak_5.png)
