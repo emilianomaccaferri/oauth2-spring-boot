@@ -4,15 +4,15 @@ server.error.include-stacktrace: never
 
 grades.uri: http://localhost:8081/
 
-
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/students
+    url: jdbc:postgresql://students_pg:5432/students
     username: test
     password: test
   jpa:
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 ---
 spring.config.activate.on-profile: docker

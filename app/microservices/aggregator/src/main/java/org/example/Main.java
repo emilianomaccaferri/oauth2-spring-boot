@@ -118,6 +118,11 @@ class Aggregate extends TimerTask {
             StudentsResponse allStudents = this.fetchData(studentsUri, StudentsResponse.class);
             GradesResponse allGrades = this.fetchData(gradesUri, GradesResponse.class);
 
+            if(!allStudents.success || !allGrades.success){
+                System.out.println("something is wrong with the response");
+                return;
+            }
+
             final List<ReportCard> cards = Arrays.stream(allStudents.result).map(student -> {
                 List<Grade> studentGrades = Arrays.stream(allGrades.result).filter(grade -> grade.studentId == student.id).toList();
                 return new ReportCard(student.name + " " + student.surname, studentGrades);

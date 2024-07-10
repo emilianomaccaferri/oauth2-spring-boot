@@ -14,6 +14,7 @@ public class GlobalErrorHandler {
     public ErrorResponse<String> handle500(
             Exception e, WebRequest w
     ){
+        e.printStackTrace();
         return ErrorResponse.internalServerError();
     }
 
