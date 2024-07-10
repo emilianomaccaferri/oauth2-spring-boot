@@ -164,6 +164,7 @@ Let's see how to create a client and how to use them.
 #### Creating a confidential client in Keycloak
 <div style="display: flex; flex-direction: column;">
 On the left panel of Keycloak's interface, click on "Clients":
+
 <img src="assets/keycloak_4.png" style="height: 600px; align-self: center">
 </div>
 In the following screen, click on "Create client".
@@ -223,5 +224,6 @@ We can see `session_state`, `iss`, and `code`. If we actually set up an applicat
 
 Note: we will use Postman throughout the entirety of chapters III - V. We will then add a frontend and see how the redirect URIs come into place.<br>
 I know this might all be confusing for first-time readers, but don't worry: I was too when I first learned about all this stuff! Don't worry, everything will fall into place by the end of this guide!
+<hr>
 
 Next chapter: [Chapter II: the system and its components — how everything connects](Chapter%20II.md) 

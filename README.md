@@ -20,8 +20,10 @@ OAuth2 addresses these (and more) problems and provides a framework that can hel
 This project is composed of seven chapters:<br>
 * [Chapter I: introduction to OAuth2 with Keycloak](chapters/Chapter%20I.md)
 * [Chapter II: the system and its components — how everything connects](chapters/Chapter%20II.md)
-* [Chapter III: base project without any authorization](chapters/Chapter%20III.md)
+* [Chapter III: base project](chapters/Chapter%20III.md)
 * [Chapter IV: first attempt and cross cutting concerns](chapters/Chapter%20IV.md)
-* [Chapter V: eliminating cross cutting concerns from the authorization layer](chapters/Chapter%20V.md)
+* [Chapter V: for the fearless — eliminating cross cutting concerns from the authorization layer](chapters/Chapter%20V.md)
 * [Chapter VI: for the brave — adding a frontend, see how the real world works](chapters/Chapter%20VI.md)
 * [Chapter VII: for the bravest — refreshing access tokens](chapters/Chapter%20VII.md) 
+
+Before starting: you can import the Postman collections (files named `oauth2-spring-boot-*.json` in this repo) to follow along more easily!
