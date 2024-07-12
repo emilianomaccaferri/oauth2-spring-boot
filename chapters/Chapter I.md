@@ -68,7 +68,7 @@ Nevertheless, credentials on the microservice must be safely handled and rotated
 ### Access token usage
 Once the access token is obtained, it can be used to make authenticated request towards the protected API (in the picture above we can represent the protected API with the "microservices" block).<br>
 It is the microservice's responsibility, then, to  verify the token's validity.<br>
-For simplicity's sake, we are not going to delve into cryptographical details on how JWTs are created: we just need to know that JWTs are cryptographically signed strings that encode information in JSON format.<br>
+For simplicity's sake, we are not going to delve into cryptographical details on how JWTs are created: we just need to know that JWTs are cryptographically signed strings that encode information in JSON format. Don't worry too much about them, we will delve deeper into this topic later in [Chapter IV](Chapter%20IV.md).<br>
 The signing happens on the OAuth2 server's side with a private key and each microservice that will need to validate tokens issued by this server will receive a copy of the server's public key: this way, the verification is done completely "offline", meaning that microservices won't need to interrogate the OAuth2 server every time it receives an authenticated request.
 
 We will see in detail how this process works in the next chapters, for now that's all we need to know.
