@@ -12,12 +12,13 @@ spring:
           issuer-uri: http://localhost:7777/realms/master
           jwk-set-uri: http://localhost:7777/realms/master/protocol/openid-connect/certs
   datasource:
-    url: jdbc:postgresql://localhost:5433/grades
+    url: jdbc:postgresql://grades_pg:5432/grades
     username: test
     password: test
   jpa:
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 ---
 spring.config.activate.on-profile: docker
