@@ -193,11 +193,10 @@ In this screen, each field is optional, but at least one valid redirect URI is r
 For now, we don't have an application to redirect codes to, so we can enter whatever we want.<br>
 
 Even if we don't have an application, we can see how the _standard flow_ works by simulating it:
-
 1. Enter `http://test.whatever` or whatever you want inside the "Valid redirect URIs" field and proceed creating the client. This screen should appear
 ![client created](assets/keycloak_8.png)
 2. Let's click on "Credentials" and copy the "Client Secret" field. This is what we will use to make requests to Keycloak when authenticating someone or an application;
-3. Now, on the left-hand side menu, click on "Realm settings" and click "OpenID Endpoint Configuration"
+3. Now, on the left-hand side menu, click on "Realm settings" and click <a name="openid-conf-endpoint">"OpenID Endpoint Configuration"</a>;
 ![openid conf](assets/keycloak_9.png)
 A new page should appear displaying JSON information about different endpoints of our Keycloak instance. This is the `openid-configuration` endpoint, that displays various URLs you can request to do various things concering our Keycloak instance. A notable one is the `authorization_endpoint`, which is the URL that gets called when a client wants to login to our system. Another interesting one is the `token_endpoint`, which is the endpoint the auth backend will call in point 6 of the previous diagram;
 4. Let's copy the `authorization_endpoint` and start a fictional login flow;
@@ -223,7 +222,7 @@ We can see `session_state`, `iss`, and `code`. If we actually set up an applicat
 14. We got to the end of the standard flow! Nice! We have everything we need to make authenticated requests to our microservices, if we had any.
 
 Note: we will use Postman throughout the entirety of chapters III - V. We will then add a frontend and see how the redirect URIs come into place.<br>
-I know this might all be confusing for first-time readers, but don't worry: I was too when I first learned about all this stuff! Don't worry, everything will fall into place by the end of this guide!
+I know this might all be confusing for first-time readers, but don't worry: I was too when I first learned about all this stuff! Don't sweat it, everything will fall into place by the end of this guide!
 <hr>
 
 Next chapter: [Chapter II: the system and its components — how everything connects](Chapter%20II.md) 

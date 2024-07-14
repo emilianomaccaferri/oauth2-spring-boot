@@ -1,12 +1,18 @@
 # Chapter IV: first attempt and cross cutting concerns
 The reference for this chapter is [oauth2-spring-boot/keycloak-cross-cutting](https://github.com/emilianomaccaferri/oauth2-spring-boot/tree/keycloak-cross-cutting), you can use the collection named `oauth2-spring-boot-auth.json` if you want to follow along with Postman.
 
+Note: this chapter requires basic knowledge about the following topics:
+
+- https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+- https://en.wikipedia.org/wiki/HMAC
+
 Now that we have our base system working correctly, it's time to plug the OAuth2 layer in and start authenticating requests.<br>
 ## JWTs (Json Web Tokens)
 Remember what we said about JWTs? JWTs are cryptographically signed strings that encode information in JSON format. That's a nice definition that sums everything a JWT is in very few words, but what exactly does it mean?
 <br>
 JWTs enable developers to share JSON objects (any JSON object, really) between applications in a way that's _non repudiable_ and _authenticated_, meaning that only clients that have the __private key__ can __emit__ tokens, whereas clients that have the __public key__ can _verify_ the authenticity of such tokens (this is basic RSA).<br>
-What's really groundbreaking about JWTs is that you can encode whatever information you want inside them, making them completely _stateless_. Let's imagine you're designing a login system for your web application that implements the following authentication flow:
+What's really groundbreaking about JWTs is that you can encode whatever information you want inside them, making them completely _stateless_.<br>
+To better understand the power of JWTs, let's imagine you're designing a login system for your web application that implements the following authentication flow:
 
 - the user inserts their username and password;
 - if the credentials are correct a session is created. You represent the session using a random string that you save inside the database and you link it to the authenticated user using the following table:
@@ -37,4 +43,328 @@ What's really groundbreaking about JWTs is that you can encode whatever informat
     ```
 - this way the server knows which user performs a certain request based on its session id.
 
-What we just described is the "classical" way of representing sessions and associating sessions with users.
+What we just described is the "classical" way of representing sessions and associating them with users.<br>
+So far so good, right? This is a good and simple approach to the task that, at first glance, works well, we deploy our solution and everyone is happy, for now.
+
+### The problem 
+We start with 1000 users and everything looks good, but what happens when the traffic towards our application scales? What happens with 10x the requests? Our system starts showing signs of bottlenecks: every time we receive a request, we hit the database with a query! Not only that, our users' table has grown, so lookup times are slower and slower for each user that registers to our service! Don't panic yet, JWTs are here to lift this burden from our shoulders; let's see how we can tackle this problem.
+<br>
+We said that every time we want to verify a user's session we need to hit the database with the query we described above, right? That is needed because the session token we send does not encode __any sort of content__, so what if we could find a way to give a meaning to our token?<br>
+That's exactly what JWTs are for: they are strings of text that can be decoded in a very efficient manner that store content and contextual information about the request that it is currently being processed by the server.<br>
+
+### A deeper dive
+JWTs look like this:
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlBpbmdsZSBEb25nbGVycyIsImJpcnRoZGF5IjoiMjAvMDMvMjAwMCIsImlhdCI6MTUxNjIzOTAyMiwiYW5vdGhlcl9jbGFpbSI6ImhlbGxvISJ9.RWOLVMv-2KCgESNJT3NGB8QZiCHSxONH9-IUfdXow50
+```
+They are essentialy composed of three parts, each separated by a dot:
+
+- the first one is the __header__, which encodes (base64) the type of token and the signing algorithm used;
+- the second one is the __payload__, which encodes the actual information we want to represent with this token. Be careful, information is __base64 encoded__, not __encrypted!__ This is something crucial we have to understand: __JWTs are not encrypted__, anyone that can read the token can decode its information! If we, in fact, take the payload from the token above and base64 decode it, we can see what's inside with no problem! ![jwt decode](assets/jwt_decode.png)
+The token is holding, as already said, a JSON object with a couple of properties:
+
+    - `sub`, `iat` and `exp` are standard properties (_registered claims_) that are generally included in every token: `sub` stands for "subject" and it usually represents some sort of identifier (the token consumer's or the token's, it depends), `iat` stands for "issued at", the timestamp the token has been generated at, whereas `exp` stands for "expiry", the timestamp representing the time at which the token will no longer be valid (expired!); tokens without the `exp` claim do not expire. [Here's a list of all registered claims](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1);
+    - other claims are custom and totally arbitrary pieces of information we can encode in our token (`name`, `birthday`, `another_claim`). 
+- the third one is the __signature__, the most important piece of the token: this "slice" is generated using a cryptographic algorithm that can be either symmetric (some variation on HMAC, i.e. `HS256`, `HS384`...) or asymmetric (RSA or elliptic curve based). Whichever algorithm we are using, this bit of the token can only be verified by those who:
+
+    - know the symmetric key that has been used to produce the signed digest, if generated symmetrically;
+    - know the public key of the issuer of the token, that signed it with their private key.
+
+Note: the "verification" of a JWT is essentially the process of ensuring the information contained in the payload has not been tampered with, because only the ones that know the cryptographic items to verify and/or sign the token can modify it!<br>
+This is by no means an exhaustive guide on JWTs, but that's essentially all there's to it. You can find more details [here](https://jwt.io/introduction).
+
+### The solution
+Ok, great stuff, but how does all of this fit into our first example? Since JWTs __directly__ encode information, we can modify our login flow: 
+
+- the user inserts their username and password;
+- if the credentials are correct a JWT is issued using a symmetric (for simplicity's sake) algorithm containing the following contents:
+    ```json
+    {
+        "iat": <whatever>,
+        "exp": <whatever> + <delta>,
+        "sub": 1,
+        "name": "ponglerio",
+        "surname": "donglis"
+    }
+    ```
+    - `iat` is set at whatever timestamp the token was generated at;
+    - `exp` is set the same date plus a delta (in seconds), meaning that the token will expire `<delta>` seconds after the `iat` timestamp;
+    - `sub` is set to `1`, meaning that the token identifies the user with id `1` (that's the id inside our database);
+    - `name` and `surname` are complementary pieces of information that can be used for other scopes;
+- the JWT is stored inside the user's cookies: this way, every time the users issues a request to your server, the token is sent to the server;
+- once the server receives a request, it reads the cookies, gets the JWT and uses the symmetric key to verify it. A successful verification means that the information has not been tampered with and the contents of the token can be consulted safely. Since token signatures are generated using high-entropy algorithms, a small change inside the contents will drastically change the signature the token is holding. More information below.
+
+The server is now not required to lookup the database everytime it receives a request and the session table is gone! This is a much more scalable approach, since it completely eliminates the bottlenecks that were strangling our system's performance.
+
+### Trying to sneak past the signature verification
+Well, what happens if an attacker changes the information inside the token? Let's see...<br>
+Let's imagine the user `anya` logs in and receives the following token:
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImFueWEiLCJhZG1pbiI6ZmFsc2UsImlhdCI6MTUxNjIzOTAyMn0.eAQUV9_QeAhuP6WTd06J4m_B2uq9-1P39v9ipncBuls
+```
+that, if decoded, outputs:
+```json
+{
+  "sub": "1234567890",
+  "name": "anya",
+  "admin": false, 
+  "iat": 1516239022
+}
+```
+For simplicity's sake, let's imagine the key used to sign the token is `supersecretkey`, a symmetrical key.
+<br>
+Now, if we head over to [jwt.io](https://jwt.io) we can decode the token above by simply pasting it inside the text input on the left:
+![jwt verification - 1](assets/jwt_io_1.png)
+
+Notice how, at the bottom, it says "Invalid Signature": that's because we did not enter our symmetric key yet
+![jwt verification - 2](assets/jwt_io_2.png)
+
+Everything checks out. Let me point out that `anya` doesn't know the key, they are just the __bearer__ of the token. All they need to do is to present it when issuing requests, so that the server can verify that they logged in _before_ making certain calls.
+
+Let's now imagine `anya` gets their PC hacked and outgoing traffic is sniffed and pre-processed before being sent to external parties. Let's imagine, then, a malicious actor trying to elevate `anya` to admin role to gain privileged access to the system.<br>
+The attacker forges a new payload...
+```json
+{
+  "sub": "1234567890",
+  "name": "anya",
+  "admin": true, <-- important change!
+  "iat": 1516239022
+}
+```
+... then they base64 encode it...
+```
+eyJzdWIiOiAiMTIzNDU2Nzg5MCIsIm5hbWUiOiAiYW55YSIsImFkbWluIjogdHJ1ZSwiaWF0IjogMTUxNjIzOTAyMn0
+```
+... and finally, they replace the old payload with the malicious one, creating a forged token! 
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiMTIzNDU2Nzg5MCIsIm5hbWUiOiAiYW55YSIsImFkbWluIjogdHJ1ZSwiaWF0IjogMTUxNjIzOTAyMn0.eAQUV9_QeAhuP6WTd06J4m_B2uq9-1P39v9ipncBuls
+```
+
+Notice how the header and signature parts are the same, only the payload changes!<br>
+Let's see what happens if we try to paste this token on [jwt.io](https://jwt.io):
+![jwt verification - 3](assets/jwt_io_3.png)
+
+Ah! The verification process __fails__ miserably, and our attacker is not able to fool our system: that's because __the signature did not change when we replaced the payload__! Since the attacker does not know the symmetric key with which signatures are generated, it is mathematically impossible to forge a token that eludes the verification process, because there's no way to guess the correct signature without the key!
+
+### How JWTs fit into OAuth2
+Remember when we talked about access and refresh tokens? They are asymmetrically-generated JWTs! This means that Keycloak generates and signs such tokens with its private key and publishes its public key to interested parties as a mean to verify issued tokens (we will see how in a bit).<br>
+In other words, once our user is authenticated, any microservice that holds Keycloak's public key will be able to verify their token without __ever__ contacting Keycloak itself: that's __really__ cool and removes __a lot__ of coupling from our system!<br>
+By leveraging the stateless nature of JWTs we created a completely distributed __authorization layer__!
+
+## Bringing everything into shape
+If you are reading this paragraph, it is assumed that you have followed the [steps described in Chapter I](Chapter%20I#keycloak) regarding the creation of Keycloak realms and clients.<br>
+In this section, the realm we are going to use is called `test-realm`, whereas the confidential clients will be called `spring` for microservices (authorization flow) and `aggregator` for the aggregator service (service account flow). Feel free to change these parameters to your liking. 
+<br>
+### Remember to change the `KC_HOSTNAME` directive to your IP in the `compose.yml` file! Stuff won't work if you don't do this!!
+
+### Modifying the microservices
+Because of OAuth2's importance in the field of distributed systems, Spring Boot actually has integrated the standard inside [Spring Security](https://spring.io/projects/spring-security).
+To add the required packages, we just need to install Spring's OAuth2 resource server.<br>
+
+Gradle:
+```gradle
+implementation("org.springframework.security:spring-security-oauth2-resource-server:6.3.1")
+```
+
+Maven:
+```xml
+<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-resource-server -->
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-oauth2-resource-server</artifactId>
+    <version>6.3.1</version>
+</dependency>
+
+```
+It's now time to configure everything to make it work with our Docker environment.
+<br>
+Inside the microservices' `application.yml` file, we must configure our OAuth2 security server to conform to our parameters:
+```yaml
+# grades microservice
+server.port: 8081
+server.error.include-message: always
+server.error.include-stacktrace: never
+students.uri: http://students:8080/
+
+spring:
+  ## the important part ##
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://your.local.ip:7778/realms/test-realm # note: this MUST be the "outside facing" URI, not the internal (Docker) one!
+          jwk-set-uri: http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
+    #### 
+  datasource:
+    url: jdbc:postgresql://grades_pg:5432/grades
+    username: test
+    password: test
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+spring:
+  devtools:
+    livereload:
+      enabled: true
+
+```
+```yaml
+# students microservice
+server.port: 8080
+server.error.include-message: always
+server.error.include-stacktrace: never
+
+grades.uri: http://grades:8080/
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://your.local.ip:7778/realms/test-realm
+          jwk-set-uri: http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
+  datasource:
+    url: jdbc:postgresql://students_pg:5432/students
+    username: test
+    password: test
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+spring:
+  devtools:
+    livereload:
+      enabled: true
+
+```
+- `issuer-uri` is the URL of our Keycloak instance. This value will be compared with the `iss` field inside the JWT, so be careful to write the exact URI;
+- `jwk-set-uri` is essentialy the endpoint where Keycloak will publish its public keys in a JSON-friendly (and standard) format and can be found by navigating to the [OpenID configuration endpoint](Chapter%20I#openid-conf-endpoint). Once started, microservices configured with this URI will automatically download public keys from the identity provider and will be able to verify tokens corresponding to such keys.
+
+With such little configuration we have essentially done everything we need to do to correctly protect our APIs with JWT validation against our Keycloak instance!<br>
+
+### Modifying the aggregator service
+Until now, the aggregator has been making unauthenticated requests: we need to fix this, because otherwise the service would not be able to reach our microservices.
+<br>
+Let's add the authentication/authorization logic:
+```java
+
+...
+private <C> C fetchData(String url, Map<String, String> headers, FormBody body, Class<C> classObj) throws IOException, NotOkException {
+    Request req = buildRequest(url, headers, body);
+    Response res = client.newCall(req).execute();
+    ResponseBody resBody = res.body();
+    if(res.code() != 200){
+        throw new NotOkException();
+    }
+    assert(resBody != null);
+    Gson gson = new Gson();
+    String strBody = resBody.string();
+    return gson.fromJson(strBody, classObj);
+}
+
+private void performAuthentication() throws NotOkException, IOException {
+    // short lived credentials for the authenticator!
+    String clientSecret = System.getenv("CLIENT_SECRET");
+    String clientId = System.getenv("CLIENT_ID");
+    String authUri = System.getenv("AUTH_URI");
+
+    FormBody body = new FormBody.Builder()
+            .add("client_id", clientId)
+            .add("client_secret", clientSecret)
+            .add("grant_type", "client_credentials")
+            .build();
+    AuthResponse auth = fetchData(authUri, null, body, AuthResponse.class);
+    this.bearerToken = auth.accessToken;
+}
+...
+@Override
+public void run() {
+    String gradesUri = System.getenv("GRADES_URI");
+    if(gradesUri == null){
+        gradesUri = "http://localhost:8081";
+    }
+
+    String studentsUri = System.getenv("STUDENTS_URI");
+    if(studentsUri == null){
+        studentsUri = "http://localhost:8080";
+    }
+
+    try{
+        StudentsResponse allStudents = this.fetchData(studentsUri, Map.of("Authorization", "Bearer " + this.bearerToken), null, StudentsResponse.class);
+        GradesResponse allGrades = this.fetchData(gradesUri, Map.of("Authorization", "Bearer " + this.bearerToken), null, GradesResponse.class);
+
+        final List<ReportCard> cards = Arrays.stream(allStudents.result).map(student -> {
+            List<Grade> studentGrades = Arrays.stream(allGrades.result).filter(grade -> grade.studentId == student.id).toList();
+            return new ReportCard(student.name + " " + student.surname, studentGrades);
+        }).toList();
+
+        cards.forEach(card -> {
+            System.out.println(card.toString());
+        });
+
+    }catch(MalformedURLException e){
+        System.out.println("cannot perform task because the url is malformed");
+    }catch(IOException e){
+        System.out.println("cannot perform http request: ");
+        e.printStackTrace();
+    }catch(NotOkException e){
+        System.out.println("unauthorized!");
+        try {
+            performAuthentication();
+        } catch (Exception ex) {
+            System.out.println("couldn't authenticate, is there something wrong with the idp?");
+        }
+    }
+}
+...
+```
+We can see that we added a fair bit of code: 
+
+- we modified the `fetchData()` function from the base branch and we added the response code check: this way, if the response code is not 200, an exception will be thrown;
+- we added the `performAuthentication()` method, that essentially performs the __service account flow__;
+- the `run()` method is essentially the same, we added the catch-block in case the request we make uses invalid credentials.
+
+Fantastic, our aggregator is now ready to make authenticated requests! Let's now see how to start everything. 
+
+### Running everything
+Let's fire up our containers and see what's up. We can see in our logs that the `aggregator` service is erroring, saying:
+```
+aggregator-1   |{Authorization=Bearer }                                                                                                          
+aggregator-1   | unauthorized!  
+```
+This proves that our API needs some sort of authorization before being used! Nice!<br>
+To fix this issue you must create a __service account__ confidential client and set the environmental values in the `compose.yml` file as such:
+```yaml
+...
+aggregator:
+    depends_on:
+      - students
+      - grades
+      - keycloak
+    networks:
+      - microservices-net
+    build:
+      context: microservices/aggregator
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - STUDENTS_URI=http://students:8080
+      - GRADES_URI=http://grades:8080
+      - AUTH_URI=http://keycloak:8080/realms/master/protocol/openid-connect/token
+      - CLIENT_SECRET=the-secret-you-got-from-keycloak
+      - CLIENT_ID=aggregator
+...
+```
+
+If you did all these steps correctly, your aggregator should now be logging the token it got from the idp and all the report cards from the microservices.
+
+## Cross cutting concerns
