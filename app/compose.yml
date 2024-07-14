@@ -2,11 +2,15 @@ networks:
   microservices-net:
     name: microservices-net
 
+volumes:
+  kc_data:
+
 services:
   aggregator:
     depends_on:
       - students
       - grades
+      - keycloak
     networks:
       - microservices-net
     build:
@@ -16,10 +20,14 @@ services:
     environment:
       - STUDENTS_URI=http://students:8080
       - GRADES_URI=http://grades:8080
-
+      - AUTH_URI=http://keycloak:8080/realms/test-realm/protocol/openid-connect/token
+      - CLIENT_SECRET=AvDjmjjKV15YqmrgNvd77TQQ2x11bzf9
+      - CLIENT_ID=aggregator
   students:
     depends_on:
       students_pg:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     networks:
       - microservices-net
@@ -36,6 +44,8 @@ services:
   grades:
     depends_on:
       grades_pg:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     networks:
       - microservices-net
@@ -74,5 +84,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - microservices-net
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: ./keycloak/Dockerfile
+      network: host
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - KC_HOSTNAME=192.168.1.108
+      - KC_HOSTNAME_PORT=7778
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HEALTH_ENABLE=true
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - kc_data:/opt/jboss/keycloak/standalone/data/
+    ports:
+      - 7778:8080
     networks:
       - microservices-net

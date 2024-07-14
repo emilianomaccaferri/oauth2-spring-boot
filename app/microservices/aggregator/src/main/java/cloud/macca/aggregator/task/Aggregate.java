@@ -50,9 +50,9 @@ public class Aggregate extends TimerTask {
 
     private void performAuthentication() throws NotOkException, IOException {
         // short lived credentials for the authenticator!
-        String clientSecret = "IxowHrHfhXYkGWh43CZIZKd2Ny4cFcPv";
-        String clientId = "aggregator";
-        String authUri = "http://localhost:7777/realms/master/protocol/openid-connect/token";
+        String clientSecret = System.getenv("CLIENT_SECRET");
+        String clientId = System.getenv("CLIENT_ID");
+        String authUri = System.getenv("AUTH_URI");
 
         FormBody body = new FormBody.Builder()
                 .add("client_id", clientId)

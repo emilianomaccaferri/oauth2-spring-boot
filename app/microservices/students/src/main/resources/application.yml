@@ -2,15 +2,15 @@ server.port: 8080
 server.error.include-message: always
 server.error.include-stacktrace: never
 
-grades.uri: http://localhost:8081/
+grades.uri: http://grades:8080/
 
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:7777/realms/master
-          jwk-set-uri: http://localhost:7777/realms/master/protocol/openid-connect/certs
+          issuer-uri: http://192.168.1.108:7778/realms/test-realm
+          jwk-set-uri: http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
   datasource:
     url: jdbc:postgresql://students_pg:5432/students
     username: test
