@@ -251,6 +251,91 @@ spring:
 
 With such little configuration we have essentially done everything we need to do to correctly protect our APIs with JWT validation against our Keycloak instance!<br>
 
+### What changed
+Now that we inserted this package and its configuration, Spring will perform authorization checks on every requests it receives. These checks generally consist of:
+
+- checking the headers (or something else, if configured) for a JWT. Spring will look, by default, inside the `Authorization` header to see if there is any `Bearer` token. This means that every request that reaches our Spring instance must have the authorization header set to the value `Authorization: Bearer <token>`. If, for example, our token was `aaabbbccc` our authorization header would look like this: `Authorization: Bearer aaabbbccc`. Spring would then extract the token and run the remaining checks. If no token is present, the request is automatically dropped;
+- checking the validity of the token and other claims, such as the issuer;
+- applying custom authorization logic (we will do it later). Here we can instruct Spring to perform other checks and/or search JWTs in other parts of the request (such as cookies).
+
+### Modifying requests between microservices
+Now that we enabled authorization on all microservices, we also have to authenticate requests made _between_ microservices.<br>
+To add the authorization logic we talked in the previous paragraph, we must support the insertion of an authorization header in our request.<br>
+The question now is, how can a microservice obtain the signed JWT that can enable it to perform authenticated requests to other microservices? Simple: it does not! Since every request that arrives to our application must already be authenticated through some form of JWT, microservices can use that JWT to authenticate other request they have to make!<br>
+Let's imagine a scenario where there is an authenticated user that issues a request to microservice A and that microservice must perform another request to microservice B, forming a chain of two requests.<br>
+The request between the user and A is authenticated, since the user presents the token to the microservice, so that works. Now, A must issue a request to B: to do so, it extracts the user's token from the previous request and uses it to perform the new one. This method not only is simple, it also enables our system to track the request of the user throughout the whole system, making it easy to log and trace users.<br>
+An additional benefit of this method is that permissions that have been given to users are enforced in every request of the chain! Let's imagine our user has the following token:
+```json
+{
+  "name": "anya",
+  "admin": false,
+  "can_access_a": true,
+  "can_access_b": false
+}
+```
+If the user has certain permissions, such as in this case, these are enforced throughout the whole chain of requests. In this case, if microservice B checked the token for the truthiness of `can_access_b`, our user wouldn't be able to access it, because their token gets passed along each node of the request chain;
+
+Now that we introduced this concept, let's modify our microservices, particularly the grades microservice.<br>
+Upon inserting a grade, in fact, the grade microservice issues a request to the students microservice to check if a student exists before inserting the grade inside its database:
+```java
+@PostMapping(value = "/{studentId}")
+    public SuccessResponse<String> addGradeToStudentId(
+            @PathVariable String studentId,
+            @RequestBody AddGradeRequest body
+    ) {
+        studentsService.getStudent(Integer.parseInt(studentId));
+        grades.insertGrade(body.getGrade(), Integer.parseInt(studentId));
+        return new SuccessResponse<String>("grade added");
+    }
+```
+Where, `getStudent` is:
+```java
+public Student getStudent(int studentId) {
+
+    return this.http
+            .get()
+            .uri("/{id}", studentId)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                throw new StudentNotFoundError(studentId);
+            })
+            .body(Student.class);
+}
+```
+As we can see, there is no track of headers and authorization. We can add our required functionality by making very few modifications.
+<br>
+We can retrieve the token from the request in this way:
+
+```java
+@PostMapping(value = "/{studentId}")
+public SuccessResponse<String> addGradeToStudentId(
+        @PathVariable String studentId,
+        @RequestBody AddGradeRequest body,
+        // we extract the authorization header here!
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+) {
+    // we are sure the header exists and is valid, because the jwt checks already passed!
+    studentsService.getStudent(Integer.parseInt(studentId), authorizationHeader);
+    grades.insertGrade(body.getGrade(), Integer.parseInt(studentId));
+    return new SuccessResponse<String>("grade added");
+}
+```
+
+and `getStudent` becomes:
+```java
+public Student getStudent(int studentId, String bearer) {
+    return this.http
+            .get()
+            .uri("/{id}", studentId)
+            .header("Authorization", bearer)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                throw new StudentNotFoundError(studentId);
+            })
+            .body(Student.class);
+}
+```
+That was pretty easy!
 ### Modifying the aggregator service
 Until now, the aggregator has been making unauthenticated requests: we need to fix this, because otherwise the service would not be able to reach our microservices.
 <br>
@@ -366,5 +451,17 @@ aggregator:
 ```
 
 If you did all these steps correctly, your aggregator should now be logging the token it got from the idp and all the report cards from the microservices.
+<br>
 
-## Cross cutting concerns
+### Trying the Authorization Flow with Postman
+Now that we setup everything, we can try to simulate a user trying to use our service with Postman.<br>
+
+<ol>
+  <li> 
+    let's fetch our credentials from Keycloak as we described in [Chapter I](Chapter%20I):
+
+  </li>
+</ol>
+
+## Injecting custom logic
+We can modify how Spring checks the 
