@@ -458,10 +458,77 @@ Now that we setup everything, we can try to simulate a user trying to use our se
 
 <ol>
   <li> 
-    let's fetch our credentials from Keycloak as we described in [Chapter I](Chapter%20I):
-
+    let's fetch our credentials from Keycloak as we described in Chapter I (supposing you correctly set up the realm);
+    <ul>
+      <li> Navigate to <code>http://KEYCLOAK_IP:KEYCLOAK_PORT/realms/test-realm/protocol/openid-connect/auth?response_type=code&client_id=spring</code>
+      </li>
+      <li> Authenticate and grab the <code>code</code> from the url;
+      </li>
+      <li> perform a <code>POST</code> request to <code>http://KEYCLOAK_IP:KEYCLOAK_PORT/realms/test-realm/protocol/openid-connect/token</code>. The request should look like this with, of course, your credentials inserted: <img src="assets/token_request_example.png">
+      </li>
+      <li>you should now have your <code>access_token</code>.</li>
+    </ul>
+  </li>
+  <li> 
+    Using the access token you got from the previous step, you can try to make a request to the API. You should also try doing the same request <b>without</b> the token - you will see a 401 error, meaning that you can't make unauthorized requests to the API anymore.
   </li>
 </ol>
 
 ## Injecting custom logic
-We can modify how Spring checks the 
+You can find the reference code regarding this paragraph [here](https://github.com/emilianomaccaferri/oauth2-spring-boot/tree/keycloak-cross-cutting/app/microservices/students/src/main/java/cloud/macca/microservices/students/oauth).
+
+We can modify how Spring performs authorization checks by creating custom beans inside our application code.
+<br>
+Right now, Spring Web Security will ensure the validity of the token, meaning that the cryptographical integrity and its expiration date will be checked by default.<br>
+To extend this behaviour, we can inject our custom logic using the `@Configuration` annotation.<br>
+Let's create a class, called `OAuth2Configuration`:
+```java
+@Configuration
+@EnableWebSecurity // this decorator allows us to configure spring web security
+public class OAuth2Configuration {
+  ...
+}
+ ````
+To implement security rules, Spring Web Security uses what's called a _security chain_, a mechanism similar to the one that `iptables` uses: to process a request, Spring executes a list of rules that compose the security chain and, if one of these errors, the request will be rejected.
+<br>
+We can add a rule - a link, if you will - to our security chain by using the `SecurityFilterChain` bean:
+```java
+@Configuration
+@EnableWebSecurity
+public class OAuth2Configuration {
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuerUri;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+      // HttpSecurity exposes the configuration API
+      ...
+    }
+  ...
+}
+```
+Inside the `filterChain` method, we will override the "default" chain by adding our custom rules:
+```java
+@Configuration
+@EnableWebSecurity
+public class OAuth2Configuration {
+    ...
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        // default chain starts here
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated()
+        ) 
+        // default chain ends here
+        // custom rules start here
+                .something(myRules());
+        return http.build();
+    }
+    ...
+}
+``` 
+
+todo: explain roles decoder and stuff
