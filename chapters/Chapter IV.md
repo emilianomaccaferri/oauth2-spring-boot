@@ -489,7 +489,7 @@ public class OAuth2Configuration {
   ...
 }
  ````
-To implement security rules, Spring Web Security uses what's called a _security chain_, a mechanism similar to the one that `iptables` uses: to process a request, Spring executes a list of rules that compose the security chain and, if one of these errors, the request will be rejected.
+To implement security rules, Spring Web Security uses what's called a _security chain_, a mechanism similar to the one that `iptables` uses: to process a request, Spring executes a list of rules that compose the security chain and, if one of these throws an error, the request will be rejected.
 <br>
 We can add a rule - a link, if you will - to our security chain by using the `SecurityFilterChain` bean:
 ```java
@@ -529,6 +529,47 @@ public class OAuth2Configuration {
     }
     ...
 }
-``` 
+```
 
-todo: explain roles decoder and stuff
+## Our use case
+Since we can create custom rules, let's imagine we want to limit access to users that have their email verified. If we take a look to the `access_token` we receive with each request, we notice that Keycloak embeds this information inside the JWT:
+```json
+{
+  "exp": 1722963232,
+  "iat": 1722962932,
+  ... more stuff
+  "email_verified": false, <-- here!
+  ... more stuff
+}
+```
+
+Inside our Spring configuration we can inject logic that reads our JWT, verifies the claim and decides what to do with the request. 
+To do so, we first must create a `JwtValidator` as a _static_ (for performance reasons) class inside our `OAuth2Configuration` bean:
+```java
+public class OAuth2Configuration {
+
+    // ...
+    // more stuff
+
+    static class EmailVerifiedValidator implements OAuth2TokenValidator<Jwt> {
+        OAuth2Error error = new OAuth2Error("email_not_verified", "You must verify your email to continue!", null);
+
+        @Override
+        public OAuth2TokenValidatorResult validate(Jwt token) {
+            String clientId = token.getClaimAsString("client_id");
+            if(clientId.equals("aggregator")){
+                return OAuth2TokenValidatorResult.success();
+            }
+            boolean isEmailVerified = token.getClaimAsBoolean("email_verified");
+            if(!isEmailVerified){
+                return OAuth2TokenValidatorResult.failure(error);
+            }
+            return OAuth2TokenValidatorResult.success();
+        }
+    }
+
+    OAuth2TokenValidator<Jwt> emailValidator(){
+        return new EmailVerifiedValidator();
+    }
+}
+```
