@@ -1,3 +1,25 @@
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+
+- [Chapter IV: first attempt and cross cutting concerns](#chapter-iv-first-attempt-and-cross-cutting-concerns)
+   * [JWTs (Json Web Tokens)](#jwts-json-web-tokens)
+      + [The problem ](#the-problem)
+      + [A deeper dive](#a-deeper-dive)
+      + [The solution](#the-solution)
+      + [Trying to sneak past the signature verification](#trying-to-sneak-past-the-signature-verification)
+      + [How JWTs fit into OAuth2](#how-jwts-fit-into-oauth2)
+   * [Bringing everything into shape](#bringing-everything-into-shape)
+      + [Modifying the microservices](#modifying-the-microservices)
+      + [What changed](#what-changed)
+      + [Modifying requests between microservices](#modifying-requests-between-microservices)
+      + [Modifying the aggregator service](#modifying-the-aggregator-service)
+      + [Running everything](#running-everything)
+      + [Trying the Authorization Flow with Postman](#trying-the-authorization-flow-with-postman)
+   * [Injecting custom logic](#injecting-custom-logic)
+      + [Our use case](#our-use-case)
+
+<!-- TOC end -->
+
+<!-- TOC --><a name="chapter-iv-first-attempt-and-cross-cutting-concerns"></a>
 # Chapter IV: first attempt and cross cutting concerns
 The reference for this chapter is [oauth2-spring-boot/keycloak-cross-cutting](https://github.com/emilianomaccaferri/oauth2-spring-boot/tree/keycloak-cross-cutting), you can use the collection named `oauth2-spring-boot-auth.json` if you want to follow along with Postman.
 
@@ -7,6 +29,7 @@ Note: this chapter requires basic knowledge about the following topics:
 - https://en.wikipedia.org/wiki/HMAC
 
 Now that we have our base system working correctly, it's time to plug the OAuth2 layer in and start authenticating requests.<br>
+<!-- TOC --><a name="jwts-json-web-tokens"></a>
 ## JWTs (Json Web Tokens)
 Remember what we said about JWTs? JWTs are cryptographically signed strings that encode information in JSON format. That's a nice definition that sums everything a JWT is in very few words, but what exactly does it mean?
 <br>
@@ -46,12 +69,14 @@ To better understand the power of JWTs, let's imagine you're designing a login s
 What we just described is the "classical" way of representing sessions and associating them with users.<br>
 So far so good, right? This is a good and simple approach to the task that, at first glance, works well, we deploy our solution and everyone is happy, for now.
 
+<!-- TOC --><a name="the-problem"></a>
 ### The problem 
 We start with 1000 users and everything looks good, but what happens when the traffic towards our application scales? What happens with 10x the requests? Our system starts showing signs of bottlenecks: every time we receive a request, we hit the database with a query! Not only that, our users' table has grown, so lookup times are slower and slower for each user that registers to our service! Don't panic yet, JWTs are here to lift this burden from our shoulders; let's see how we can tackle this problem.
 <br>
 We said that every time we want to verify a user's session we need to hit the database with the query we described above, right? That is needed because the session token we send does not encode __any sort of content__, so what if we could find a way to give a meaning to our token?<br>
 That's exactly what JWTs are for: they are strings of text that can be decoded in a very efficient manner that store content and contextual information about the request that it is currently being processed by the server.<br>
 
+<!-- TOC --><a name="a-deeper-dive"></a>
 ### A deeper dive
 JWTs look like this:
 ```
@@ -73,6 +98,7 @@ The token is holding, as already said, a JSON object with a couple of properties
 Note: the "verification" of a JWT is essentially the process of ensuring the information contained in the payload has not been tampered with, because only the ones that know the cryptographic items to verify and/or sign the token can modify it!<br>
 This is by no means an exhaustive guide on JWTs, but that's essentially all there's to it. You can find more details [here](https://jwt.io/introduction).
 
+<!-- TOC --><a name="the-solution"></a>
 ### The solution
 Ok, great stuff, but how does all of this fit into our first example? Since JWTs __directly__ encode information, we can modify our login flow: 
 
@@ -96,6 +122,7 @@ Ok, great stuff, but how does all of this fit into our first example? Since JWTs
 
 The server is now not required to lookup the database everytime it receives a request and the session table is gone! This is a much more scalable approach, since it completely eliminates the bottlenecks that were strangling our system's performance.
 
+<!-- TOC --><a name="trying-to-sneak-past-the-signature-verification"></a>
 ### Trying to sneak past the signature verification
 Well, what happens if an attacker changes the information inside the token? Let's see...<br>
 Let's imagine the user `anya` logs in and receives the following token:
@@ -146,17 +173,21 @@ Let's see what happens if we try to paste this token on [jwt.io](https://jwt.io)
 
 Ah! The verification process __fails__ miserably, and our attacker is not able to fool our system: that's because __the signature did not change when we replaced the payload__! Since the attacker does not know the symmetric key with which signatures are generated, it is mathematically impossible to forge a token that eludes the verification process, because there's no way to guess the correct signature without the key!
 
+<!-- TOC --><a name="how-jwts-fit-into-oauth2"></a>
 ### How JWTs fit into OAuth2
 Remember when we talked about access and refresh tokens? They are asymmetrically-generated JWTs! This means that Keycloak generates and signs such tokens with its private key and publishes its public key to interested parties as a mean to verify issued tokens (we will see how in a bit).<br>
 In other words, once our user is authenticated, any microservice that holds Keycloak's public key will be able to verify their token without __ever__ contacting Keycloak itself: that's __really__ cool and removes __a lot__ of coupling from our system!<br>
 By leveraging the stateless nature of JWTs we created a completely distributed __authorization layer__!
 
+<!-- TOC --><a name="bringing-everything-into-shape"></a>
 ## Bringing everything into shape
 If you are reading this paragraph, it is assumed that you have followed the [steps described in Chapter I](Chapter%20I#keycloak) regarding the creation of Keycloak realms and clients.<br>
 In this section, the realm we are going to use is called `test-realm`, whereas the confidential clients will be called `spring` for microservices (authorization flow) and `aggregator` for the aggregator service (service account flow). Feel free to change these parameters to your liking. 
 <br>
+<!-- TOC --><a name="remember-to-change-the-kc_hostname-directive-to-your-ip-in-the-composeyml-file-stuff-wont-work-if-you-dont-do-this"></a>
 ### Remember to change the `KC_HOSTNAME` directive to your IP in the `compose.yml` file! Stuff won't work if you don't do this!!
 
+<!-- TOC --><a name="modifying-the-microservices"></a>
 ### Modifying the microservices
 Because of OAuth2's importance in the field of distributed systems, Spring Boot actually has integrated the standard inside [Spring Security](https://spring.io/projects/spring-security).
 To add the required packages, we just need to install Spring's OAuth2 resource server.<br>
@@ -251,6 +282,7 @@ spring:
 
 With such little configuration we have essentially done everything we need to do to correctly protect our APIs with JWT validation against our Keycloak instance!<br>
 
+<!-- TOC --><a name="what-changed"></a>
 ### What changed
 Now that we inserted this package and its configuration, Spring will perform authorization checks on every requests it receives. These checks generally consist of:
 
@@ -258,6 +290,7 @@ Now that we inserted this package and its configuration, Spring will perform aut
 - checking the validity of the token and other claims, such as the issuer;
 - applying custom authorization logic (we will do it later). Here we can instruct Spring to perform other checks and/or search JWTs in other parts of the request (such as cookies).
 
+<!-- TOC --><a name="modifying-requests-between-microservices"></a>
 ### Modifying requests between microservices
 Now that we enabled authorization on all microservices, we also have to authenticate requests made _between_ microservices.<br>
 To add the authorization logic we talked in the previous paragraph, we must support the insertion of an authorization header in our request.<br>
@@ -336,6 +369,7 @@ public Student getStudent(int studentId, String bearer) {
 }
 ```
 That was pretty easy!
+<!-- TOC --><a name="modifying-the-aggregator-service"></a>
 ### Modifying the aggregator service
 Until now, the aggregator has been making unauthenticated requests: we need to fix this, because otherwise the service would not be able to reach our microservices.
 <br>
@@ -420,6 +454,7 @@ We can see that we added a fair bit of code:
 
 Fantastic, our aggregator is now ready to make authenticated requests! Let's now see how to start everything. 
 
+<!-- TOC --><a name="running-everything"></a>
 ### Running everything
 Let's fire up our containers and see what's up. We can see in our logs that the `aggregator` service is erroring, saying:
 ```
@@ -453,6 +488,7 @@ aggregator:
 If you did all these steps correctly, your aggregator should now be logging the token it got from the idp and all the report cards from the microservices.
 <br>
 
+<!-- TOC --><a name="trying-the-authorization-flow-with-postman"></a>
 ### Trying the Authorization Flow with Postman
 Now that we setup everything, we can try to simulate a user trying to use our service with Postman.<br>
 
@@ -474,6 +510,7 @@ Now that we setup everything, we can try to simulate a user trying to use our se
   </li>
 </ol>
 
+<!-- TOC --><a name="injecting-custom-logic"></a>
 ## Injecting custom logic
 You can find the reference code regarding this paragraph [here](https://github.com/emilianomaccaferri/oauth2-spring-boot/tree/keycloak-cross-cutting/app/microservices/students/src/main/java/cloud/macca/microservices/students/oauth).
 
@@ -531,7 +568,8 @@ public class OAuth2Configuration {
 }
 ```
 
-## Our use case
+<!-- TOC --><a name="our-use-case"></a>
+### Our use case
 Since we can create custom rules, let's imagine we want to limit access to users that have their email verified. If we take a look to the `access_token` we receive with each request, we notice that Keycloak embeds this information inside the JWT:
 ```json
 {
@@ -539,37 +577,78 @@ Since we can create custom rules, let's imagine we want to limit access to users
   "iat": 1722962932,
   ... more stuff
   "email_verified": false, <-- here!
+  "client_id": "some_client_id"
   ... more stuff
 }
 ```
 
 Inside our Spring configuration we can inject logic that reads our JWT, verifies the claim and decides what to do with the request. 
-To do so, we first must create a `JwtValidator` as a _static_ (for performance reasons) class inside our `OAuth2Configuration` bean:
+To do so, we create a `EmailValidator` class that we will later use inside our `OAuth2Configuration` bean:
 ```java
-public class OAuth2Configuration {
+public class EmailVerifiedValidator implements OAuth2TokenValidator<Jwt> {
+      OAuth2Error error = new OAuth2Error("email_not_verified", "You must verify your email to continue!", null);
 
-    // ...
-    // more stuff
-
-    static class EmailVerifiedValidator implements OAuth2TokenValidator<Jwt> {
-        OAuth2Error error = new OAuth2Error("email_not_verified", "You must verify your email to continue!", null);
-
-        @Override
-        public OAuth2TokenValidatorResult validate(Jwt token) {
-            String clientId = token.getClaimAsString("client_id");
-            if(clientId.equals("aggregator")){
-                return OAuth2TokenValidatorResult.success();
-            }
-            boolean isEmailVerified = token.getClaimAsBoolean("email_verified");
-            if(!isEmailVerified){
-                return OAuth2TokenValidatorResult.failure(error);
-            }
-            return OAuth2TokenValidatorResult.success();
-        }
-    }
-
-    OAuth2TokenValidator<Jwt> emailValidator(){
-        return new EmailVerifiedValidator();
-    }
+      @Override
+      public OAuth2TokenValidatorResult validate(Jwt token) {
+          boolean isEmailVerified = token.getClaimAsBoolean("email_verified");
+          if(!isEmailVerified){
+              return OAuth2TokenValidatorResult.failure(error);
+          }
+          return OAuth2TokenValidatorResult.success();
+      }
 }
 ```
+This class extends the `OAuth2TokenValidator` which is one of the many generic classes that we can use to alter the rule flow in Spring's security chain. Upon receiving a request, in fact, each security chain class' `validate` method will be called: if any of them fails, the security chain will stop processing rules and the request will be rejected.
+<br>
+In this example, the `validate` method receives a `Jwt` instance (because it is a `OAuth2TokenValidator<Jwt>`) that we can use to implement our custom logic: we get the `email_verified` claim, we check for its truthiness and, if the claim is `null` or `false`, we reject the request.
+<br>
+We almost forget about the `aggregator` client! Service accounts do not have email associated to them, at least not in our case, so we must skip the check in case we receive a request from the aggregator.<br>
+To verify the client's name we can check the `client_id` claim:
+```java
+public OAuth2TokenValidatorResult validate(Jwt token) {
+    String clientId = token.getClaimAsString("client_id");
+    if(clientId.equals("aggregator")){
+        // we skip the check here 
+        return OAuth2TokenValidatorResult.success();
+    }
+    boolean isEmailVerified = token.getClaimAsBoolean("email_verified");
+    if(!isEmailVerified){
+        return OAuth2TokenValidatorResult.failure(error);
+    }
+    return OAuth2TokenValidatorResult.success();
+}
+```
+
+To support these kind of checks, Spring uses something called `JwtDecoder` security rules. To add a `JwtDecoder` we need to create a bean that embeds our custom logic, we can do that by adding a bean to our `OAuth2Configuration` class:
+
+```java
+@Bean
+JwtDecoder rolesDecoder(){
+    // this creates a JwtDecoder from the configured issuer. 
+    // you can read more here: https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/oauth2/jwt/JwtDecoders.html
+    NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
+    // we create our EmailValidator
+    OAuth2TokenValidator<Jwt> withEmailCheck = new DelegatingOAuth2TokenValidator<>(new EmailValidator());
+    // we add it to the jwt decoder
+    jwtDecoder.setJwtValidator(withEmailCheck);
+    return jwtDecoder;
+}
+```
+To add the jwt decoder to the security chain, we must use the `oauth2ResourceServer` subchain (the part of the security chain dedicated to jwt-related checks):
+
+```java
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  http
+      .authorizeHttpRequests(authorize -> authorize
+      .anyRequest().authenticated()
+  )
+  // we add this subchain checks
+  .oauth2ResourceServer(oauth2 ->
+          oauth2.jwt(jwt ->
+                  jwt.decoder(rolesDecoder())) // here's our decoder
+  );
+  return http.build();
+}
+```
+And there we have it! Custom checks and rules inside the JWT chain, unleashing the true power of the Spring Security library!
