@@ -201,4 +201,5 @@ ReportCard{studentFullName='Whatever', studentGrades=[10, 9, 8, 4], avg = 7.75}
 Now that everything is up and running, let's see how to implement authorization and authentication!
 <hr>
 
-Next chapter: [Chapter IV: first attempt and cross cutting concerns](Chapter%20IV.md)
+Next chapter: [Chapter IV: implementing authentication](Chapter%20IV.md)<br>
+Previous chapter: [Chapter II: the system and its components — how everything connects](Chapter%20II.md)

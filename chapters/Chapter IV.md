@@ -1,6 +1,6 @@
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
-- [Chapter IV: first attempt and cross cutting concerns](#chapter-iv-first-attempt-and-cross-cutting-concerns)
+- [Chapter IV: implementing authentication](#chapter-iv-first-attempt-and-cross-cutting-concerns)
    * [JWTs (Json Web Tokens)](#jwts-json-web-tokens)
       + [The problem ](#the-problem)
       + [A deeper dive](#a-deeper-dive)
@@ -16,11 +16,12 @@
       + [Trying the Authorization Flow with Postman](#trying-the-authorization-flow-with-postman)
    * [Injecting custom logic](#injecting-custom-logic)
       + [Our use case](#our-use-case)
+      + [Cross cutting concerns with security rules](#cross-cutting-concerns-with-security-rules)
 
 <!-- TOC end -->
 
 <!-- TOC --><a name="chapter-iv-first-attempt-and-cross-cutting-concerns"></a>
-# Chapter IV: first attempt and cross cutting concerns
+# Chapter IV: implementing authentication
 The reference for this chapter is [oauth2-spring-boot/keycloak-cross-cutting](https://github.com/emilianomaccaferri/oauth2-spring-boot/tree/keycloak-cross-cutting), you can use the collection named `oauth2-spring-boot-auth.json` if you want to follow along with Postman.
 
 Note: this chapter requires basic knowledge about the following topics:
@@ -652,3 +653,13 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 }
 ```
 And there we have it! Custom checks and rules inside the JWT chain, unleashing the true power of the Spring Security library!
+
+<!-- TOC --><a name="cross-cutting-concerns-with-security-rules"></a>
+### Cross cutting concerns with security rules
+At this stage of the project, we successfully created a flock of microservices that implement custom security rules for authentication.<br>
+We already noticed, though, that we had to copy our security rules on every microservice (in this case we only have two, but imagine having more than 10!), a process that is not only boring and cumbersome, but also very error prone!<br>
+There are tools such as [Lombok](https://projectlombok.org/) that help us reducing boilerplate and keeping our code more maintainable, but such tools are language-dependant: what if we had microservices written in different languages? How could we implement such security rules in a way that is uniform and language-agnostic across microservices? Well, if you are curious, you should definitely check Chapter V, the last one, where we will create a single layer in our infrastructure that will be responsible of handling the authorization and authentication of our requests.
+<hr>
+
+Next chapter: [Chapter V: for the fearless — eliminating cross cutting concerns from the authorization layer with NGINX](Chapter%20V)<br>
+Previous chapter: [Chapter III: base project](Chapter%20III)<br>

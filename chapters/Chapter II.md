@@ -39,4 +39,5 @@ Our goal, by the end of this guide, is to be able to implement these functionali
 Now that we have introduced every component, let's see _how_ they are made!
 <hr>
 
-Next chapter: [Chapter III: base project](Chapter%20III.md)
+Next chapter: [Chapter III: base project](Chapter%20III.md)<br>
+Previous chapter: [Chapter I: introduction to OAuth2 with Keycloak](Chapter%20I.md)
