@@ -443,5 +443,5 @@ Important note: with this configuration, the gateway __does not verify the authe
 Naturally, that responsibility can be, too, lifted from the microservices (and it's good practice to do so, to reduce their sizes), but for simplicity's sake I chose not to include cryptographical checks in this chapter.
 <hr>
 
-Next chapter: [Appendix: Refreshing access tokens](Appendix.md)<br>
+Next chapter: [Appendix: refreshing access tokens](Appendix.md)<br>
 Previous chapter: [Chapter IV: implementing authentication](Chapter%20IV.md)

@@ -16,6 +16,6 @@ This project is composed of five chapters, plus an appendix:<br>
 * [Chapter III: base project](chapters/Chapter%20III.md)
 * [Chapter IV: implementing authentication](chapters/Chapter%20IV.md)
 * [Chapter V: for the fearless — eliminating cross cutting concerns from the authorization layer with NGINX](chapters/Chapter%20V.md)
-* [Appendix: Refreshing access tokens](chapters/Appendix.md) 
+* [Appendix: refreshing access tokens](chapters/Appendix.md) 
 
 Note: you can import the Postman collections (files named `oauth2-spring-boot-*.json` in this repo) to follow along more easily!
