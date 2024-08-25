@@ -1,6 +1,6 @@
 # oauth2-spring-boot
 An implementation of OAuth2 authorization using Spring Boot. <br>
-Written an developed for the [Distributed Edge Programming exam](https://github.com/nbicocchi/learn-microservices/) @ Unimore.
+Written and developed for the [Distributed Edge Programming exam](https://github.com/nbicocchi/learn-microservices/) @ Unimore.
 
 # What is OAuth2 (and why should I use it)?
 OAuth2 is the microservice industry's de-facto standard for authorization that enables a third-party application to obtain limited access to an HTTP service, either on behalf of a resource owner by orchestrating an approval interaction between the resource owner and the HTTP service, or by allowing the third-party application to obtain access on its own behalf.<br>
