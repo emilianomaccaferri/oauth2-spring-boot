@@ -3,6 +3,23 @@ networks:
     name: microservices-net
 
 services:
+  aggregator:
+    depends_on:
+      - students
+      - grades
+      - keycloak
+    network_mode: host
+    build:
+      context: microservices/aggregator
+      dockerfile: Dockerfile
+    mem_limit: 512m
+    environment:
+      - STUDENTS_URI=http://localhost:8089/students/
+      - GRADES_URI=http://localhost:8089/grades/
+      - AUTH_URI=http://192.168.1.108:7777/realms/master/protocol/openid-connect/token
+      - CLIENT_SECRET=252OWf0A21BXKAnu0rFefDhRd27RYS6l
+      - CLIENT_ID=aggregator
+
   students:
     depends_on:
       students_pg:
@@ -66,7 +83,7 @@ services:
       network: host
     entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
     environment:
-      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME=192.168.1.108
       - KC_HOSTNAME_PORT=7777
       - KC_HOSTNAME_STRICT=false
       - KC_HOSTNAME_STRICT_HTTPS=false

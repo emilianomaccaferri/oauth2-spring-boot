@@ -50,9 +50,9 @@ public class Aggregate extends TimerTask {
 
     private void performAuthentication() throws NotOkException, IOException {
         // short lived credentials for the authenticator!
-        String clientSecret = "F2gMYzEXhxyZjqRaWjiU7jma4U5mCWDP";
-        String clientId = "aggregator";
-        String authUri = "http://localhost:7777/realms/master/protocol/openid-connect/token";
+        String clientSecret = System.getenv("CLIENT_SECRET");
+        String clientId = System.getenv("CLIENT_ID");
+        String authUri = System.getenv("AUTH_URI");
 
         FormBody body = new FormBody.Builder()
                 .add("client_id", clientId)
@@ -67,12 +67,12 @@ public class Aggregate extends TimerTask {
     public void run() {
         String gradesUri = System.getenv("GRADES_URI");
         if(gradesUri == null){
-            gradesUri = "http://localhost:8089/grades/";
+            gradesUri = "http://localhost:8081";
         }
 
         String studentsUri = System.getenv("STUDENTS_URI");
         if(studentsUri == null){
-            studentsUri = "http://localhost:8089/students/";
+            studentsUri = "http://localhost:8080";
         }
 
         try{
@@ -94,6 +94,7 @@ public class Aggregate extends TimerTask {
             System.out.println("cannot perform http request: ");
             e.printStackTrace();
         }catch(NotOkException e){
+            e.printStackTrace();
             System.out.println("unauthorized!");
             try {
                 performAuthentication();

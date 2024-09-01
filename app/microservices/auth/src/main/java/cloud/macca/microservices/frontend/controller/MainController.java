@@ -45,7 +45,7 @@ public class MainController {
 
     @GetMapping(value = "/init-login")
     public RedirectView beginLoginSession(){
-        return new RedirectView(authEndpoint + "/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=example-spring&redirect_uri=" + redirectUri);
+        return new RedirectView(authEndpoint + "/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=" + clientId + "&redirect_uri=" + redirectUri);
     }
 
     @GetMapping(value = "/test-no-filter")
